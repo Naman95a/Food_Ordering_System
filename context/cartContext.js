@@ -33,18 +33,26 @@ export const CartProvider = ({ children }) => {
         });
     };
 
-    const removeFromCart = (itemId) => {
-        console.log("Removing from cart:", itemId);
-        setCart((prevCart) => prevCart.filter((item) => item.id !== itemId));
+    const removeFromCart = (id) => {
+        setCart((prevCart) => prevCart.filter((item) => item.id !== id));
     };
-
+    
     const clearCart = () => {
         console.log("Cart cleared!");
         setCart([]);
     };
 
+    const updateQuantity = (id, newQuantity) => {
+        setCart((prevCart) =>
+            prevCart.map((item) =>
+                item.id === id ? { ...item, quantity: Math.max(newQuantity, 1) } : item
+            )
+        );
+    };
+    
+
     return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity ,clearCart}}>
             {children}
         </CartContext.Provider>
     );
