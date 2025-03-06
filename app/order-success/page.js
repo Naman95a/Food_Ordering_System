@@ -1,9 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Confetti from "react-confetti";
+import dynamic from "next/dynamic";
 
-const OrderSuccess = () => {
+// Dynamically import Confetti to avoid SSR issues
+const Confetti = dynamic(() => import("react-confetti"), { ssr: false });
+
+const OrderSuccessContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
@@ -21,8 +24,10 @@ const OrderSuccess = () => {
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100 text-center">
-      {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} />}
-      
+      {showConfetti && (
+        <Confetti width={window.innerWidth} height={window.innerHeight} />
+      )}
+
       <div className="bg-white p-8 rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-green-600">🎉 Order Placed Successfully! 🎉</h1>
         <p className="mt-4 text-lg">Your order ID is <strong>{orderId}</strong></p>
@@ -31,5 +36,11 @@ const OrderSuccess = () => {
     </div>
   );
 };
+
+const OrderSuccess = () => (
+  <Suspense fallback={<p>Loading...</p>}>
+    <OrderSuccessContent />
+  </Suspense>
+);
 
 export default OrderSuccess;
