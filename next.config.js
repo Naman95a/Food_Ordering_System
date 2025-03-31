@@ -10,7 +10,3 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
-<<<<<<< HEAD
-  
-=======
->>>>>>> 766de7fea7d108cccc619ff1a8809717e1525104

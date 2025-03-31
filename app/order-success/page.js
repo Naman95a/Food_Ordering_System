@@ -1,10 +1,6 @@
 "use client";
 import { useEffect, useState, Suspense } from "react";
-<<<<<<< HEAD
-import { useRouter } from "next/navigation";
-=======
 import { useRouter, useSearchParams } from "next/navigation";
->>>>>>> 766de7fea7d108cccc619ff1a8809717e1525104
 import dynamic from "next/dynamic";
 
 // Dynamically import Confetti to avoid SSR issues
@@ -37,7 +33,6 @@ const OrderSuccessContent = () => {
   }, [router]);
 
   return (
-<<<<<<< HEAD
     <div className="flex flex-col items-center justify-center h-screen bg-[#0d0d0d] text-white text-center relative overflow-hidden">
       {/* Only render Confetti if in client */}
       {isClient && showConfetti && (
@@ -65,17 +60,6 @@ const OrderSuccessContent = () => {
         >
           🚀 Go to My Orders
         </button>
-=======
-    <div className="flex items-center justify-center h-screen bg-gray-100 text-center">
-      {showConfetti && (
-        <Confetti width={window.innerWidth} height={window.innerHeight} />
-      )}
-
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-green-600">🎉 Order Placed Successfully! 🎉</h1>
-        <p className="mt-4 text-lg">Your order ID is <strong>{orderId}</strong></p>
-        <p className="text-gray-600 mt-2">You will be redirected to 'My Orders' shortly...</p>
->>>>>>> 766de7fea7d108cccc619ff1a8809717e1525104
       </div>
 
       {/* Floating Sparkles Effect */}
