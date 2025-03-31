@@ -97,13 +97,13 @@ const CheckoutPage = () => {
                     <ul className="space-y-4 mt-4">
                         {cart.map((item) => (
                             <li key={item.id} className="p-4 border border-gray-300 dark:border-gray-700 rounded-lg">
-                                {item.name} - {item.quantity} x ${item.price}
+                                {item.name} - {item.quantity} x ₹{item.price}
                             </li>
                         ))}
                     </ul>
 
                     <p className="mt-4 text-lg font-semibold">
-                        <strong>Total:</strong> ${cart.reduce((sum, item) => sum + item.price * item.quantity, 0)}
+                        <strong>Total:</strong> ₹{cart.reduce((sum, item) => sum + item.price * item.quantity, 0)}
                     </p>
 
                     {/* Checkout Form */}
@@ -139,10 +139,10 @@ const CheckoutPage = () => {
                                 value={formData.paymentMethod}
                                 onChange={handleInputChange}
                             >
-                                <option value="">Select Payment Method</option>
-                                <option value="Credit Card">💳 Credit Card</option>
-                                <option value="PayPal">💰 PayPal</option>
-                                <option value="Cash on Delivery">🚚 Cash on Delivery</option>
+                                <option className="bg-gray-900 text-white"  value="">Select Payment Method</option>
+                                <option className="bg-gray-900 text-white"  value="Credit Card">💳 Credit Card</option>
+                                <option className="bg-gray-900 text-white"  value="PayPal">💰 PayPal</option>
+                                <option className="bg-gray-900 text-white" value="Cash on Delivery">🚚 Cash on Delivery</option>
                             </select>
                         </div>
                     </div>

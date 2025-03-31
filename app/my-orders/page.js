@@ -17,7 +17,6 @@ const MyOrdersPage = () => {
     checkAdminStatus();
   }, []);
 
-  // Fetch Orders
   const fetchOrders = async () => {
     const { data, error } = await supabase
       .from("orders")
@@ -31,15 +30,12 @@ const MyOrdersPage = () => {
     }
   };
 
-  // Check if User is Admin
   const checkAdminStatus = async () => {
     const { data: userData, error: userError } = await supabase.auth.getUser();
     if (userError || !userData.user) {
       console.error("Error fetching user data:", userError);
       return;
     }
-
-    console.log("User Data:", userData.user);
 
     const { data: userInfo, error: roleError } = await supabase
       .from("users")
@@ -52,31 +48,21 @@ const MyOrdersPage = () => {
     } else if (!userInfo) {
       console.warn("User not found in users table.");
     } else {
-      console.log("User Role Data:", userInfo);
       setIsAdmin(userInfo.role === "admin");
       setUser(userData.user);
     }
   };
 
-  // Update Order Status (Admin)
   const updateStatus = async (orderId, newStatus) => {
     const allowedStatuses = ["Pending", "Preparing", "Out for Delivery", "Delivered", "Cancelled"];
-
-    if (!allowedStatuses.includes(newStatus)) {
-      console.error(`Invalid status: ${newStatus}`);
-      return;
-    }
-
-    console.log(`Updating order ${orderId} to status: ${newStatus}`);
+    if (!allowedStatuses.includes(newStatus)) return;
 
     const { error } = await supabase
       .from("orders")
       .update({ status: newStatus })
       .eq("id", orderId);
 
-    if (error) {
-      console.error("Error updating status:", error);
-    } else {
+    if (!error) {
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === orderId ? { ...order, status: newStatus } : order
@@ -85,113 +71,98 @@ const MyOrdersPage = () => {
     }
   };
 
-  // Cancel Order (User)
   const cancelOrder = async (orderId) => {
-    const confirmCancel = window.confirm("Are you sure you want to cancel this order?");
-    if (!confirmCancel) return;
+    if (!window.confirm("Are you sure you want to cancel this order?")) return;
 
-    console.log(`Attempting to cancel order: ${orderId}`);
-
-    // Ensure the order exists before updating
     const { data: existingOrder, error: fetchError } = await supabase
-        .from("orders")
-        .select("id, status")
-        .eq("id", orderId)
-        .maybeSingle();
+      .from("orders")
+      .select("id, status")
+      .eq("id", orderId)
+      .maybeSingle();
 
-    if (fetchError) {
-        console.error("Error fetching order before cancellation:", fetchError);
-        return;
-    }
+    if (fetchError || !existingOrder || existingOrder.status !== "Pending") return;
 
-    if (!existingOrder) {
-        console.error("Order not found.");
-        return;
-    }
-
-    if (existingOrder.status !== "Pending") {
-        console.warn("Order cannot be canceled as it is not in 'Pending' status.");
-        return;
-    }
-
-    // Proceed with cancellation
     const { error } = await supabase
-        .from("orders")
-        .update({ status: "Cancelled" })
-        .eq("id", orderId);
+      .from("orders")
+      .update({ status: "Cancelled" })
+      .eq("id", orderId);
 
-    if (error) {
-        console.error("Error canceling order:", error);
-    } else {
-        console.log(`Order ${orderId} successfully canceled.`);
-        setOrders((prevOrders) =>
-            prevOrders.map((order) =>
-                order.id === orderId ? { ...order, status: "Cancelled" } : order
-            )
-        );
+    if (!error) {
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === orderId ? { ...order, status: "Cancelled" } : order
+        )
+      );
     }
-};
-
+  };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">My Orders</h1>
+    <div className="min-h-screen bg-gray-900 text-white p-6">
+      <h1 className="text-3xl font-bold mb-6 text-center">My Orders</h1>
+
       {orders.length === 0 ? (
-        <p>No orders found.</p>
+        <p className="text-center text-gray-400">No orders found.</p>
       ) : (
-        orders.map((order) => {
-          let parsedItems = [];
-          try {
-            parsedItems = JSON.parse(order.items);
-          } catch (error) {
-            console.error("Error parsing items JSON:", error);
-          }
+        <div className="space-y-6">
+          {orders.map((order) => {
+            let parsedItems = [];
+            try {
+              parsedItems = JSON.parse(order.items);
+            } catch (error) {
+              console.error("Error parsing items JSON:", error);
+            }
 
-          let totalPrice = order.total || parsedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            let totalPrice = order.total || parsedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-          return (
-            <div key={order.id} className="border p-4 mb-4 rounded-lg">
-              <p><strong>Order ID:</strong> {order.id}</p>
-              <p><strong>Date:</strong> {new Date(order.created_at).toLocaleString()}</p>
+            return (
+              <div key={order.id} className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                <p className="text-lg"><strong>Order ID:</strong> {order.id}</p>
+                <p className="text-gray-400"><strong>Date:</strong> {new Date(order.created_at).toLocaleString()}</p>
 
-              <p><strong>Items:</strong></p>
-              <ul>
-                {parsedItems.map((item, index) => (
-                  <li key={index}>{item.name} x{item.quantity} - ${item.price.toFixed(2)}</li>
-                ))}
-              </ul>
-
-              <p><strong>Total:</strong> ${totalPrice.toFixed(2)}</p>
-              <p><strong>Status:</strong> {order.status}</p>
-
-              {/* Admin Status Dropdown */}
-              {isAdmin && (
-                <select
-                  value={order.status}
-                  onChange={(e) => updateStatus(order.id, e.target.value)}
-                  disabled={order.status === "Delivered" || order.status === "Cancelled"} // Disable for completed orders
-                  className="border p-2 rounded-lg"
-                >
-                  {["Pending", "Preparing", "Out for Delivery", "Delivered"].map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
+                <p className="mt-3"><strong>Items:</strong></p>
+                <ul className="list-disc pl-5">
+                  {parsedItems.map((item, index) => (
+                    <li key={index} className="text-gray-300">
+                      {item.name} x{item.quantity} - <span className="text-green-400">₹{item.price.toFixed(2)}</span>
+                    </li>
                   ))}
-                </select>
-              )}
+                </ul>
 
-              {/* Cancel Button (Users can cancel only "Pending" orders) */}
-              {!isAdmin && order.status === "Pending" && (
-                <button
-                  onClick={() => cancelOrder(order.id)}
-                  className="mt-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-                >
-                  Cancel Order
-                </button>
-              )}
-            </div>
-          );
-        })
+                <p className="mt-3 text-lg"><strong>Total:</strong> <span className="text-green-400">₹{totalPrice.toFixed(2)}</span></p>
+                <p className="mt-2"><strong>Status:</strong> <span className={`px-2 py-1 rounded ${order.status === "Pending" ? "bg-yellow-500 text-black" : order.status === "Delivered" ? "bg-green-500 text-black" : order.status === "Cancelled" ? "bg-red-500 text-white" : "bg-blue-500 text-white"}`}>{order.status}</span></p>
+
+                {isAdmin && (
+                  <div className="mt-4">
+                    <label className="block text-gray-300 mb-1">Update Status:</label>
+                    <select
+                      value={order.status}
+                      onChange={(e) => updateStatus(order.id, e.target.value)}
+                      disabled={order.status === "Delivered" || order.status === "Cancelled"}
+                      className="bg-gray-700 text-white p-2 rounded-lg w-full"
+                    >
+                      {["Pending", "Preparing", "Out for Delivery", "Delivered"].map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+{!isAdmin && order.status === "Pending" && (
+  <button
+    onClick={() => cancelOrder(order.id)}
+    className="mt-4 bg-red-600 text-white px-3 py-1 rounded-lg w-40 hover:bg-red-700 transition"
+  >
+    Cancel Order
+
+
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );

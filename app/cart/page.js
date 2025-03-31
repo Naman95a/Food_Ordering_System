@@ -27,7 +27,7 @@ const CartPage = () => {
                     {cart.map((item) => (
                         <li key={item.id} className="p-4 border border-gray-300 dark:border-gray-700 rounded-lg">
                             <h3 className="text-xl font-semibold">{item.name}</h3>
-                            <p className="text-gray-600 dark:text-gray-300">Price: ${item.price}</p>
+                            <p className="text-gray-600 dark:text-gray-300">Price: ₹{item.price}</p>
                             <p>Quantity: {item.quantity}</p>
                             <button 
                                 onClick={() => removeFromCart(item.id)}

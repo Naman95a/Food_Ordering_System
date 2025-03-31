@@ -16,6 +16,10 @@ const MenuPage = () => {
     const { cart, addToCart, removeFromCart, updateQuantity } = useCart();
     const [isCartOpen, setIsCartOpen] = useState(false);
     const menuRef = useRef(null);
+    const customLoader = ({ src }) => {
+        return src; // Allows any external image URL
+      };
+      
 
     useEffect(() => {
         const fetchMenu = async () => {
@@ -102,30 +106,45 @@ const MenuPage = () => {
                 </div>
             </div>
 
-            {/* Menu List */}
-            <ul ref={menuRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredMenu.map((item) => (
-                    <li key={item.id} className="p-4 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg bg-gray-50 dark:bg-gray-800">
-                        <div className="w-full h-[300px] overflow-hidden rounded-lg">
-                            <img
-                                src={item.imageUrl}
-                                alt={item.name}
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                        <h3 className="text-xl font-semibold mt-3">{item.name}</h3>
-                        <p className="text-gray-600 dark:text-gray-300 flex items-center gap-1">
-                            <FaMoneyBillAlt /> Price: ${item.price}
-                        </p>
-                        <button
-                            onClick={() => handleAddToCart(item)}
-                            className="mt-2 flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-transform duration-200 hover:scale-105"
-                        >
-                            <FaPlus /> Add to Cart
-                        </button>
-                    </li>
-                ))}
-            </ul>
+           {/* Menu List */}
+{/* Menu List */}
+{/* Menu List */}
+<ul ref={menuRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {filteredMenu.map((item) => (
+        <li key={item.id} className="p-4 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg bg-gray-50 dark:bg-gray-800 overflow-hidden">
+            {/* Image with Increased Height */}
+            <div className="w-full h-72">  {/* Increase height to h-72 or h-80 */}
+                <Image
+                    loader={customLoader}
+                    src={item.imageUrl}
+                    alt={item.name}
+                    width={300} 
+                    height={288}  // Matches h-72 (72 * 4px = 288px)
+                    className="w-full h-full object-cover rounded-lg"
+                />
+            </div>
+
+            {/* Content Below */}
+            <div className="p-3">
+                <h3 className="text-xl font-semibold">{item.name}</h3>
+                <p className="text-gray-600 dark:text-gray-300 flex items-center gap-1">
+                    <FaMoneyBillAlt /> Price: ₹{item.price}
+                </p>
+                <button
+                    onClick={() => handleAddToCart(item)}
+                    className="mt-2 flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-transform duration-200 hover:scale-105"
+                >
+                    <FaPlus /> Add to Cart
+                </button>
+            </div>
+        </li>
+    ))}
+</ul>
+
+
+
+
+
 
             {/* Cart Sidebar */}
             {isCartOpen && (
@@ -159,7 +178,7 @@ const MenuPage = () => {
                     </ul>
 
                     {/* Total Price */}
-                    <p className="font-semibold mt-4">Total: ${cart.reduce((sum, item) => sum + item.price * item.quantity, 0)}</p>
+                    <p className="font-semibold mt-4">Total: ₹{cart.reduce((sum, item) => sum + item.price * item.quantity, 0)}</p>
                     
                     {/* Checkout Button */}
                     {cart.length > 0 && (

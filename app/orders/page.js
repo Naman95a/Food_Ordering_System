@@ -20,7 +20,7 @@ const OrdersPage = () => {
             {orders.length === 0 ? <p>No orders found.</p> : orders.map((order) => (
                 <div key={order.id}>
                     <p>Order ID: {order.id}</p>
-                    <p>Total Price: ${order.total_price}</p>
+                    <p>Total Price: ₹{order.total_price}</p>
                     <p>Status: {order.status}</p>
                 </div>
             ))}
